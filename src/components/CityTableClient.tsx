@@ -195,7 +195,7 @@ export default function CityTableClient() {
                   <TableHead onClick={() => handleSort("timezone")} className="cursor-pointer hover:bg-muted/80">
                     Timezone <SortIcon columnKey="timezone" />
                   </TableHead>
-                  <TableHead>Weather</TableHead>
+                  
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -215,17 +215,6 @@ export default function CityTableClient() {
                       <TableCell>{city.cou_name_en}</TableCell>
                       <TableCell className="text-right">{city.population?.toLocaleString() || "N/A"}</TableCell>
                       <TableCell>{city.timezone}</TableCell>
-                      <TableCell>
-                        {cached ? (
-                          <div className="flex items-center gap-2 text-sm">
-                             {cached.icon && (cached.icon.includes('n') ? <CloudMoon className="h-4 w-4 text-muted-foreground" /> : <CloudSun className="h-4 w-4 text-muted-foreground" />) }
-                            <span>{cached.temp?.toFixed(1)}°C</span>
-                            <span className="text-xs text-muted-foreground truncate hidden sm:inline" title={cached.description}>{cached.description}</span>
-                          </div>
-                        ) : (
-                          <span className="text-xs text-muted-foreground">View weather</span>
-                        )}
-                      </TableCell>
                     </TableRow>
                   );
                 })}
