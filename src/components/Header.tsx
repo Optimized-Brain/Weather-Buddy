@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Zap, History as HistoryIcon } from "lucide-react";
+import { CloudSun as WeatherIcon, Zap, History as HistoryIcon } from "lucide-react";
 import {
   Popover,
   PopoverContent,
@@ -13,8 +13,8 @@ export default function Header() {
     <header className="bg-primary text-primary-foreground shadow-md">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
-          <Zap size={28} />
-          <span>WeatherEye</span>
+        <WeatherIcon size={28} />
+          <span>WeatherBuddy</span>
         </Link>
         
         <Popover>

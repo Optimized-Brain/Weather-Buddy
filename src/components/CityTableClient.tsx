@@ -70,7 +70,7 @@ export default function CityTableClient() {
   } = useInfiniteQuery<CityApiResponse, Error>(
     {
       queryKey: ["cities", debouncedSearchTerm, sortConfig],
-      queryFn: ({ pageParam }) => fetchCities({ pageParam, searchTerm: debouncedSearchTerm, sortBy: sortConfig.key, sortOrder: sortConfig.direction }),
+      queryFn: ({ pageParam }) => fetchCities({ pageParam: pageParam as number, searchTerm: debouncedSearchTerm, sortBy: sortConfig.key, sortOrder: sortConfig.direction }),
       getNextPageParam: (lastPage, allPages) => {
         const currentResultsCount = allPages.reduce((acc, page) => acc + page.results.length, 0);
         if (currentResultsCount < lastPage.total_count) {

@@ -9,7 +9,7 @@ const geistSans = GeistSans; // Using the direct import
 const geistMono = GeistMono;
 
 export const metadata: Metadata = {
-  title: "WeatherEye - Your Weather Companion",
+  title: "WeatherBuddy - Your Weather Companion",
   description: "Get detailed weather forecasts for cities around the world.",
 };
 
@@ -27,7 +27,7 @@ export default function RootLayout({
             {children}
           </main>
           <footer className="py-4 text-center text-sm text-muted-foreground border-t">
-            © {new Date().getFullYear()} WeatherEye. All rights reserved.
+             {new Date().getFullYear()} WeatherBuddy. Made by Shoaib Attar
           </footer>
         </AppProviders>
       </body>

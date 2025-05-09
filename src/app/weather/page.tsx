@@ -18,7 +18,7 @@ interface WeatherPageProps {
 export async function generateMetadata({ searchParams }: WeatherPageProps): Promise<Metadata> {
   const cityName = searchParams.name ? decodeURIComponent(searchParams.name) : "Weather";
   return {
-    title: `${cityName} Forecast - WeatherEye`,
+    title: `${cityName} Forecast - WeatherBuddy`,
     description: `Get the latest weather forecast for ${cityName}.`,
   };
 }

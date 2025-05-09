@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 import { createContext, useContext, useState, useCallback, useEffect } from "react";
 
 const MAX_HISTORY_ITEMS = 10;
-const LOCATION_HISTORY_KEY = "weatherEyeLocationHistory";
+const LOCATION_HISTORY_KEY = "weatherBuddyLocationHistory";
 
 interface LocationHistoryContextType {
   viewedLocations: ViewedLocation[];
