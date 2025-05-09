@@ -1,3 +1,5 @@
+<img src="./WeatherBuddyLogo.jpg" alt="Weather Buddy Logo" width="100" height="90" />  
+
 ## WeatherBuddy
 
 Weather‑Buddy is a responsive weather‑forecasting web app that lets users automatically detect their current location or search any city worldwide to get instant conditions and 7‑day forecasts. It also keeps a history of viewed locations for quick revisits.
