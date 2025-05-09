@@ -1,23 +1,45 @@
+
 import type { WeatherCondition, ForecastItem, ProcessedDailyForecast } from "./types";
 import {
   Sun, Cloud, CloudRain, CloudSnow, CloudLightning, CloudFog, CloudDrizzle, Wind, CloudSun, CloudMoon, Umbrella, Snowflake, ThermometerSun, ThermometerSnowflake
 } from "lucide-react";
-import type { LucideProps } from "lucide-react";
+import type { JSX } from 'react'; // Explicit JSX type import
 
-export function getWeatherIcon(conditionCode: number, iconStr: string, size: number = 24): React.ReactElement<LucideProps> {
-  // Check night time from iconStr (if it contains 'n')
+export function getWeatherIcon(conditionCode: number, iconStr: string, size: number = 24): JSX.Element {
   const isNight = iconStr.includes('n');
 
-  // Simplified mapping based on OpenWeatherMap condition codes
-  // Group codes: https://openweathermap.org/weather-conditions#Weather-Condition-Codes-2
-  if (conditionCode >= 200 && conditionCode < 300) return <CloudLightning size={size} />; // Thunderstorm
-  if (conditionCode >= 300 && conditionCode < 400) return <CloudDrizzle size={size} />; // Drizzle
-  if (conditionCode >= 500 && conditionCode < 600) return <CloudRain size={size} />;    // Rain
-  if (conditionCode >= 600 && conditionCode < 700) return <CloudSnow size={size} />;    // Snow
-  if (conditionCode >= 700 && conditionCode < 800) return <CloudFog size={size} />;     // Atmosphere (Mist, Smoke, Haze, etc.)
-  if (conditionCode === 800) return isNight ? <CloudMoon size={size} /> : <Sun size={size} />;               // Clear
-  if (conditionCode === 801) return isNight ? <CloudMoon size={size} /> : <CloudSun size={size} />; // Few clouds
-  if (conditionCode > 801 && conditionCode < 805) return <Cloud size={size} />;          // Clouds (Scattered, Broken, Overcast)
+  // Thunderstorm
+  if (conditionCode >= 200 && conditionCode < 300) {
+    return <CloudLightning size={size} />;
+  }
+  // Drizzle
+  if (conditionCode >= 300 && conditionCode < 400) {
+    return <CloudDrizzle size={size} />;
+  }
+  // Rain
+  if (conditionCode >= 500 && conditionCode < 600) {
+    return <CloudRain size={size} />;
+  }
+  // Snow
+  if (conditionCode >= 600 && conditionCode < 700) {
+    return <CloudSnow size={size} />;
+  }
+  // Atmosphere (Mist, Smoke, Haze, etc.)
+  if (conditionCode >= 700 && conditionCode < 800) {
+    return <CloudFog size={size} />;
+  }
+  // Clear
+  if (conditionCode === 800) {
+    return isNight ? <CloudMoon size={size} /> : <Sun size={size} />;
+  }
+  // Few clouds
+  if (conditionCode === 801) {
+    return isNight ? <CloudMoon size={size} /> : <CloudSun size={size} />;
+  }
+  // Clouds (Scattered, Broken, Overcast)
+  if (conditionCode > 801 && conditionCode < 805) {
+    return <Cloud size={size} />;
+  }
   
   // Fallback icon
   return isNight ? <CloudMoon size={size} /> : <CloudSun size={size} />;
@@ -74,20 +96,24 @@ export function processHourlyForecastToDaily(forecastItems: ForecastItem[]): Pro
     const temp_min = Math.min(...dayInfo.temps);
     const temp_max = Math.max(...dayInfo.temps);
     
-    // Find the most frequent weather condition for the day, or prioritize more significant weather.
-    // For simplicity, we'll take the condition around midday (12:00-15:00) if available, or the first one.
     const middayCondition = dayInfo.conditions.find((_cond, index) => {
-      const item = forecastItems.find(fi => fi.dt_txt.startsWith(date) && fi.weather[0].id === dayInfo.conditions[index].id);
-      if (item) {
-        const hour = new Date(item.dt * 1000).getHours();
-        return hour >= 12 && hour < 15;
+      // Find the corresponding forecast item to get the hour
+      const itemForHour = forecastItems.find(fi => 
+        fi.dt_txt.startsWith(date) && 
+        fi.weather[0].id === dayInfo.conditions[index].id && 
+        fi.weather[0].icon === dayInfo.icons[index] 
+      );
+      if (itemForHour) {
+        const hour = new Date(itemForHour.dt * 1000).getHours();
+        return hour >= 12 && hour < 15; // Prefer midday icon
       }
       return false;
-    }) || dayInfo.conditions[0];
+    }) || dayInfo.conditions[Math.floor(dayInfo.conditions.length / 2)] || dayInfo.conditions[0]; // Fallback to middle or first
 
-    const precipitationChance = Math.max(...dayInfo.pop) * 100; // Max probability of precipitation for the day
 
-    const dateObj = new Date(date + "T00:00:00"); // Ensure parsing in local timezone
+    const precipitationChance = Math.max(...dayInfo.pop) * 100; 
+
+    const dateObj = new Date(date + "T00:00:00"); 
     const dayName = dateObj.toLocaleDateString(undefined, { weekday: 'short' });
 
     return {
@@ -95,11 +121,11 @@ export function processHourlyForecastToDaily(forecastItems: ForecastItem[]): Pro
       dayName,
       temp_min,
       temp_max,
-      icon: middayCondition.icon, // Use icon string for WeatherIcon component
+      icon: middayCondition.icon, 
       description: middayCondition.description,
       precipitationChance,
     };
-  }).slice(0, 5); // Max 5 days forecast
+  }).slice(0, 5); 
 }
 
 export function formatTemperature(temp: number): string {
@@ -107,7 +133,7 @@ export function formatTemperature(temp: number): string {
 }
 
 export function formatWindSpeed(speed: number): string {
-  return `${speed.toFixed(1)} m/s`; // meters per second
+  return `${speed.toFixed(1)} m/s`; 
 }
 
 export function formatPressure(pressure: number): string {
