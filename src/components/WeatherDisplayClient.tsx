@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 import WeatherCard from "./WeatherCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { MapPin, Thermometer, Wind as WindIcon, Droplets, Gauge, Sunrise, Sunset, CalendarDays, Eye, Umbrella } from "lucide-react";
+import { MapPin, Thermometer, Wind as WindIcon, Droplets, Gauge, Sunrise, Sunset, CalendarDays, Eye, Umbrella, Snowflake as SnowflakeIcon, AlertTriangle } from "lucide-react";
 import Image from "next/image";
 
 interface WeatherDisplayClientProps {
@@ -51,7 +51,7 @@ export default function WeatherDisplayClient({ cityName, latitude, longitude, ge
 
   useEffect(() => {
     if (data?.current) {
-      const { main, weather, name: apiCityName } = data.current;
+      const { main, weather } = data.current;
       updateWeatherCache(geonameId, {
         temp: main.temp,
         temp_max: main.temp_max,
@@ -61,11 +61,15 @@ export default function WeatherDisplayClient({ cityName, latitude, longitude, ge
       });
       const bgClass = getWeatherBackgroundClass(weather[0]?.main);
       setDynamicBackgroundClass(bgClass);
-      document.body.className = document.body.className.replace(/weather-bg-\w+/g, '').trim() + ` ${bgClass}`;
+      // Remove any existing weather-bg-* classes then add the new one
+      document.body.className = document.body.className.replace(/weather-bg-\w+/g, '').trim();
+      document.body.classList.add(bgClass);
     }
     // Cleanup background on component unmount
     return () => {
-      document.body.className = document.body.className.replace(/weather-bg-\w+/g, '').trim() + ` weather-bg-default`;
+      document.body.className = document.body.className.replace(/weather-bg-\w+/g, '').trim();
+      // Optionally, add back a default class if needed, e.g., weather-bg-default
+      // document.body.classList.add("weather-bg-default"); 
     };
   }, [data, geonameId, updateWeatherCache]);
 
@@ -125,13 +129,13 @@ export default function WeatherDisplayClient({ cityName, latitude, longitude, ge
             </div>
           </div>
            <Image 
-              src={`https://picsum.photos/seed/${current.weather[0].main}/600/200`} 
+              src={`https://picsum.photos/seed/${current.weather[0].main.replace(/\s+/g, '-')}-${current.weather[0].id}/600/200`} 
               alt={current.weather[0].description}
               data-ai-hint={`${current.weather[0].main} weather`}
               width={600} 
               height={200} 
               className="w-full h-32 object-cover rounded-md mt-6"
-              priority={false}
+              priority={false} // Not critical for LCP
             />
         </WeatherCard>
 
@@ -161,7 +165,7 @@ export default function WeatherDisplayClient({ cityName, latitude, longitude, ge
             )}
             {current.snow && current.snow["1h"] && (
                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2 text-muted-foreground"><Snowflake className="h-5 w-5 text-accent" /> Snow (1h)</div>
+                    <div className="flex items-center gap-2 text-muted-foreground"><SnowflakeIcon className="h-5 w-5 text-accent" /> Snow (1h)</div>
                     <span className="font-medium">{current.snow["1h"]} mm</span>
                 </div>
             )}
@@ -185,7 +189,8 @@ export default function WeatherDisplayClient({ cityName, latitude, longitude, ge
               >
                 <div className="flex flex-col items-center">
                   <div className="my-2 text-4xl text-primary">
-                    {getWeatherIcon(0, day.icon, 40)} {/* Pass 0 as code if not available, rely on icon string */}
+                    {/* Use a dummy condition code (e.g., 0) if only icon string is available from processed forecast */}
+                    {getWeatherIcon(0, day.icon, 40)} 
                   </div>
                   <p className="font-semibold text-lg">
                     {formatTemperature(day.temp_max)} / <span className="text-muted-foreground">{formatTemperature(day.temp_min)}</span>
@@ -277,3 +282,4 @@ function WeatherPageSkeletonLayout({ cityName }: { cityName: string }) {
     </div>
   );
 }
+

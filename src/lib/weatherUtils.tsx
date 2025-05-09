@@ -10,39 +10,39 @@ export function getWeatherIcon(conditionCode: number, iconStr: string, size: num
 
   // Thunderstorm
   if (conditionCode >= 200 && conditionCode < 300) {
-    return <CloudLightning size={size} />;
+    return (<CloudLightning size={size} />);
   }
   // Drizzle
   if (conditionCode >= 300 && conditionCode < 400) {
-    return <CloudDrizzle size={size} />;
+    return (<CloudDrizzle size={size} />);
   }
   // Rain
   if (conditionCode >= 500 && conditionCode < 600) {
-    return <CloudRain size={size} />;
+    return (<CloudRain size={size} />);
   }
   // Snow
   if (conditionCode >= 600 && conditionCode < 700) {
-    return <CloudSnow size={size} />;
+    return (<CloudSnow size={size} />);
   }
   // Atmosphere (Mist, Smoke, Haze, etc.)
   if (conditionCode >= 700 && conditionCode < 800) {
-    return <CloudFog size={size} />;
+    return (<CloudFog size={size} />);
   }
   // Clear
   if (conditionCode === 800) {
-    return isNight ? <CloudMoon size={size} /> : <Sun size={size} />;
+    return isNight ? (<CloudMoon size={size} />) : (<Sun size={size} />);
   }
   // Few clouds
   if (conditionCode === 801) {
-    return isNight ? <CloudMoon size={size} /> : <CloudSun size={size} />;
+    return isNight ? (<CloudMoon size={size} />) : (<CloudSun size={size} />);
   }
   // Clouds (Scattered, Broken, Overcast)
   if (conditionCode > 801 && conditionCode < 805) {
-    return <Cloud size={size} />;
+    return (<Cloud size={size} />);
   }
   
   // Fallback icon
-  return isNight ? <CloudMoon size={size} /> : <CloudSun size={size} />;
+  return isNight ? (<CloudMoon size={size} />) : (<CloudSun size={size} />);
 }
 
 export function getWeatherBackgroundClass(mainCondition?: string): string {
@@ -151,3 +151,4 @@ export function getUvIndexStyles(uvIndex: number): {text: string; className: str
     if (uvIndex <= 10) return { text: "Very High", className: "bg-red-600 text-white" };
     return { text: "Extreme", className: "bg-purple-600 text-white" };
 }
+
