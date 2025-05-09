@@ -52,5 +52,5 @@ Use OpenWeather API Key to run it locally
 
 
 ```dotenv
-NEXT_PUBLIC_OPENWEATHER_API_KEY=your_api_key_here
+OPENWEATHERMAP_API_KEY=your_api_key_here
 ```
