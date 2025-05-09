@@ -3,9 +3,11 @@
 
 import type { ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+// import { ReactQueryDevtools } from '@tanstack/react-query-devtools'; // Keep commented out
 import { Toaster } from "@/components/ui/toaster";
 import { WeatherDataContextProvider } from "@/contexts/WeatherDataContext";
+import { LocationHistoryProvider } from "@/contexts/LocationHistoryContext";
+
 
 // Create a client
 const queryClient = new QueryClient({
@@ -20,10 +22,12 @@ const queryClient = new QueryClient({
 export function AppProviders({ children }: { children: ReactNode }) {
   return (
     <QueryClientProvider client={queryClient}>
-      <WeatherDataContextProvider>
-        {children}
-        <Toaster />
-      </WeatherDataContextProvider>
+      <LocationHistoryProvider>
+        <WeatherDataContextProvider>
+          {children}
+          <Toaster />
+        </WeatherDataContextProvider>
+      </LocationHistoryProvider>
       {/* <ReactQueryDevtools initialIsOpen={false} /> */}
     </QueryClientProvider>
   );

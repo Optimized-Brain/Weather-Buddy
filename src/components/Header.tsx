@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { Zap } from "lucide-react";
+import { Zap, History as HistoryIcon } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import ViewedLocationsList from "@/components/ViewedLocationsList";
+import { Button } from "@/components/ui/button";
 
 export default function Header() {
   return (
@@ -9,7 +16,18 @@ export default function Header() {
           <Zap size={28} />
           <span>WeatherEye</span>
         </Link>
-        {/* Future navigation links can go here */}
+        
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="ghost" size="icon" className="text-primary-foreground hover:bg-primary/80 focus-visible:ring-offset-primary focus-visible:ring-primary-foreground">
+              <HistoryIcon size={24} />
+              <span className="sr-only">Viewed Locations</span>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-72 p-0" align="end">
+            <ViewedLocationsList />
+          </PopoverContent>
+        </Popover>
       </div>
     </header>
   );

@@ -89,7 +89,7 @@ export interfaceCurrentWeather {
     sunset: number;
   };
   timezone: number;
-  id: number;
+  id: number; // OpenWeatherMap city ID
   name: string;
   cod: number;
 }
@@ -130,11 +130,19 @@ export interface ProcessedDailyForecast {
 }
 
 export interface CachedWeatherData {
-  id: string; // geoname_id
+  id: string; // geoname_id or OWM city_id
   temp?: number;
   temp_max?: number;
   temp_min?: number;
   description?: string;
   icon?: string;
   timestamp: number; // To potentially expire cache
+}
+
+export interface ViewedLocation {
+  id: string; // Can be geoname_id from Geonames API or city_id from OpenWeatherMap
+  name: string;
+  lat: number;
+  lon: number;
+  timestamp: number; // For sorting by recency, when it was added/viewed
 }

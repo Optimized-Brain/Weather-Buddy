@@ -1,8 +1,10 @@
+// src/components/WeatherDisplayClient.tsx
 "use client";
 
 import type { InterfaceCurrentWeather, ForecastApiResponse, ProcessedDailyForecast } from "@/lib/types";
 import { OPENWEATHERMAP_BASE_URL, OPENWEATHERMAP_API_KEY } from "@/lib/apiConstants";
 import { useWeatherDataContext } from "@/contexts/WeatherDataContext";
+import { useLocationHistory } from "@/contexts/LocationHistoryContext";
 import { getWeatherIcon, getWeatherBackgroundClass, processHourlyForecastToDaily, formatTemperature, formatWindSpeed, formatPressure, formatHumidity } from "@/lib/weatherUtils";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -13,10 +15,10 @@ import { MapPin, Thermometer, Wind as WindIcon, Droplets, Gauge, Sunrise, Sunset
 import Image from "next/image";
 
 interface WeatherDisplayClientProps {
-  cityName: string;
+  cityName: string; // Name from URL, fallback
   latitude: number;
   longitude: number;
-  geonameId: string;
+  geonameId: string; // ID from URL (can be geoname_id or OWM city_id)
 }
 
 async function fetchWeatherData(lat: number, lon: number): Promise<{ current: InterfaceCurrentWeather; forecast: ForecastApiResponse }> {
@@ -40,38 +42,47 @@ async function fetchWeatherData(lat: number, lon: number): Promise<{ current: In
 
 export default function WeatherDisplayClient({ cityName, latitude, longitude, geonameId }: WeatherDisplayClientProps) {
   const { updateWeatherCache } = useWeatherDataContext();
+  const { addLocationToHistory } = useLocationHistory();
   const [dynamicBackgroundClass, setDynamicBackgroundClass] = useState("weather-bg-default");
 
   const { data, isLoading, isError, error } = useQuery<{ current: InterfaceCurrentWeather; forecast: ForecastApiResponse }, Error>(
     {
-      queryKey: ["weather", latitude, longitude],
+      queryKey: ["weather", latitude, longitude, geonameId], // Added geonameId to queryKey for more specificity
       queryFn: () => fetchWeatherData(latitude, longitude),
     }
   );
 
   useEffect(() => {
     if (data?.current) {
-      const { main, weather } = data.current;
-      updateWeatherCache(geonameId, {
+      const { main, weather, name: apiCityName } = data.current;
+      
+      // Update weather cache (for city table quick view)
+      updateWeatherCache(geonameId, { // geonameId is the ID from URL
         temp: main.temp,
         temp_max: main.temp_max,
         temp_min: main.temp_min,
         description: weather[0]?.description,
         icon: weather[0]?.icon,
       });
+
+      // Add to location history
+      addLocationToHistory({
+        id: geonameId, // ID from URL (could be geoname_id or OWM city_id)
+        name: apiCityName || cityName, // Prefer name from API response, fallback to prop from URL
+        lat: latitude, // Prop from URL
+        lon: longitude, // Prop from URL
+      });
+      
       const bgClass = getWeatherBackgroundClass(weather[0]?.main);
       setDynamicBackgroundClass(bgClass);
-      // Remove any existing weather-bg-* classes then add the new one
       document.body.className = document.body.className.replace(/weather-bg-\w+/g, '').trim();
       document.body.classList.add(bgClass);
     }
-    // Cleanup background on component unmount
     return () => {
       document.body.className = document.body.className.replace(/weather-bg-\w+/g, '').trim();
-      // Optionally, add back a default class if needed, e.g., weather-bg-default
       // document.body.classList.add("weather-bg-default"); 
     };
-  }, [data, geonameId, updateWeatherCache]);
+  }, [data, geonameId, cityName, latitude, longitude, updateWeatherCache, addLocationToHistory]);
 
   if (isLoading) return <WeatherPageSkeletonLayout cityName={cityName}/>;
   if (isError) return (
@@ -100,7 +111,6 @@ export default function WeatherDisplayClient({ cityName, latitude, longitude, ge
         <p className="text-lg text-muted-foreground">{currentDate}</p>
       </header>
 
-      {/* Main weather section */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <WeatherCard title="Current Weather" icon={getWeatherIcon(current.weather[0].id, current.weather[0].icon, 48)} className="md:col-span-2">
           <div className="flex flex-col sm:flex-row items-center sm:items-start sm:justify-between gap-4">
@@ -135,7 +145,7 @@ export default function WeatherDisplayClient({ cityName, latitude, longitude, ge
               width={600} 
               height={200} 
               className="w-full h-32 object-cover rounded-md mt-6"
-              priority={false} // Not critical for LCP
+              priority={false}
             />
         </WeatherCard>
 
@@ -173,7 +183,6 @@ export default function WeatherDisplayClient({ cityName, latitude, longitude, ge
         </WeatherCard>
       </div>
 
-      {/* Daily Forecast Section */}
       {dailyForecasts.length > 0 && (
         <div>
           <h2 className="text-2xl font-semibold mb-4 text-foreground flex items-center gap-2">
@@ -189,7 +198,6 @@ export default function WeatherDisplayClient({ cityName, latitude, longitude, ge
               >
                 <div className="flex flex-col items-center">
                   <div className="my-2 text-4xl text-primary">
-                    {/* Use a dummy condition code (e.g., 0) if only icon string is available from processed forecast */}
                     {getWeatherIcon(0, day.icon, 40)} 
                   </div>
                   <p className="font-semibold text-lg">
@@ -227,14 +235,13 @@ function WeatherPageSkeletonLayout({ cityName }: { cityName: string }) {
       </header>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Current Weather Skeleton */}
         <div className="p-6 rounded-lg shadow-lg bg-card/80 md:col-span-2">
-          <Skeleton className="h-8 w-1/3 mb-2" /> {/* Current Weather Title */}
+          <Skeleton className="h-8 w-1/3 mb-2" /> 
           <div className="flex flex-col sm:flex-row items-center sm:items-start sm:justify-between gap-4">
             <div className="text-center sm:text-left">
-              <Skeleton className="h-20 w-32 mb-2" /> {/* Temp */}
-              <Skeleton className="h-6 w-40 mb-2" /> {/* Description */}
-              <Skeleton className="h-4 w-48" /> {/* Feels like, High/Low */}
+              <Skeleton className="h-20 w-32 mb-2" /> 
+              <Skeleton className="h-6 w-40 mb-2" /> 
+              <Skeleton className="h-4 w-48" /> 
             </div>
             <div className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm w-full sm:w-auto mt-4 sm:mt-0">
               {[...Array(4)].map((_, i) => (
@@ -248,12 +255,11 @@ function WeatherPageSkeletonLayout({ cityName }: { cityName: string }) {
               ))}
             </div>
           </div>
-          <Skeleton className="w-full h-32 rounded-md mt-6" /> {/* Image Placeholder */}
+          <Skeleton className="w-full h-32 rounded-md mt-6" /> 
         </div>
 
-        {/* Details Skeleton */}
          <div className="p-6 rounded-lg shadow-lg bg-card/80">
-          <Skeleton className="h-8 w-1/2 mb-4" /> {/* Details Title */}
+          <Skeleton className="h-8 w-1/2 mb-4" /> 
            <div className="space-y-3">
             {[...Array(4)].map((_, i) => (
               <div key={i} className="flex justify-between items-center">
@@ -265,16 +271,15 @@ function WeatherPageSkeletonLayout({ cityName }: { cityName: string }) {
         </div>
       </div>
 
-      {/* Forecast Skeleton */}
       <div>
-        <Skeleton className="h-8 w-1/4 mb-4" /> {/* Forecast Title */}
+        <Skeleton className="h-8 w-1/4 mb-4" /> 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="p-4 rounded-lg shadow-md bg-card/70">
-              <Skeleton className="h-6 w-1/2 mb-2 mx-auto" /> {/* Day Name */}
-              <Skeleton className="h-10 w-10 rounded-full mx-auto mb-2" /> {/* Icon */}
-              <Skeleton className="h-4 w-3/4 mb-1 mx-auto" /> {/* Temp Max/Min */}
-              <Skeleton className="h-3 w-full mx-auto" /> {/* Description */}
+              <Skeleton className="h-6 w-1/2 mb-2 mx-auto" /> 
+              <Skeleton className="h-10 w-10 rounded-full mx-auto mb-2" /> 
+              <Skeleton className="h-4 w-3/4 mb-1 mx-auto" /> 
+              <Skeleton className="h-3 w-full mx-auto" /> 
             </div>
           ))}
         </div>
@@ -282,4 +287,3 @@ function WeatherPageSkeletonLayout({ cityName }: { cityName: string }) {
     </div>
   );
 }
-
